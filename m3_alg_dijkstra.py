@@ -5,6 +5,8 @@
 вагами ребер від однієї вершини до всіх інших."""
 
 import heapq
+import matplotlib.pyplot as plt
+import networkx as nx
 
 
 def dijkstra(graph, start_vertex, end_vertex=None) -> dict:
@@ -57,24 +59,82 @@ def dijkstra(graph, start_vertex, end_vertex=None) -> dict:
         return {"distance": distances, "path": None}
 
 
+def to_digraph(graph: dict) -> nx.DiGraph:
+    """Перетворення графа в направлений nx.DiGraph
+
+    Параметри:
+        graph: dict - граф в вигляді словника з вагою ребер.;
+        напр.: {'A': {'B': 5, 'C': 10}, 'B': {'A': 5, 'D': 3}, 'C': {'A': 10, 'D': 2}, 'D': {'B': 3, 'E': 4}, 'E': {'D': 4}}.
+
+    """
+    di_graph = nx.DiGraph()
+
+    # Додавання ребер та ваг
+    for node, neighbors in graph.items():
+        for neighbor, weight in neighbors.items():
+            di_graph.add_edge(node, neighbor, weight=weight)
+    return di_graph
+
+
+def graph_show(G: nx.DiGraph) -> None:
+    """Візуалізація графа
+
+    Візуалізація графа з вагами ребер. Використовуємо бібліотеку networkx.
+    Довжини ребер пропорційні їх вазі.
+    """
+    plt.figure(figsize=(8, 6))
+
+    # Позиціонування вузлів і зврахуванням відстані (ваги ребер)
+    pos = nx.kamada_kawai_layout(G)
+    nx.draw(
+        G,
+        pos,
+        with_labels=True,
+        node_size=1500,
+        node_color="skyblue",
+        font_size=12,
+        font_weight="bold",
+    )
+    edge_labels = nx.get_edge_attributes(G, "weight")
+    nx.draw_networkx_edge_labels(
+        G, pos, edge_labels=edge_labels, font_color="red", font_size=10
+    )
+    title = "Візуалізація графа"
+    plt.gcf().canvas.manager.set_window_title(title)
+    # plt.axis("off")  # Вимкнення відображення координатної осі
+    plt.show()
+
+
 if __name__ == "__main__":
     # Приклад графа у вигляді словника
     graph = {
         "A": {"B": 5, "C": 10},
         "B": {"A": 5, "D": 3},
         "C": {"A": 10, "D": 2},
-        "D": {"B": 3, "C": 2, "E": 4},
+        # "D": {"B": 3, "C": 2, "E": 4},
+        "D": {"B": 3, "E": 4},
         "E": {"D": 4},
     }
 
-    print(f"{graph = }")
+    print("Граф:")
+    print(f"{graph}")
 
-    print(f"{dijkstra(graph, 'A') = }")
-    print(f"{dijkstra(graph, 'A', 'D') = }")
-    print(f"{dijkstra(graph, 'A', 'E') = }")
+    # Задаємо початкову вершину
+    start_node = "A"
+    # та прелік вершин, до яких визначаємо маршрути
+    end_nodes = filter(lambda x: x != start_node, graph.keys())
 
-    import matplotlib.pyplot as plt
-    import networkx as nx
+    print()
+    print(f"Найкоротші шляхи від початкової вершини {start_node} до всіх вершин:")
+    for end_node in end_nodes:
+        print(
+            f"{start_node} -> {end_node}: {dijkstra(graph, start_node, end_node)['distance']:3}, маршрут: {dijkstra(graph, start_node, end_node)['path']}"
+        )
 
-    nx.draw(nx.Graph(graph), with_labels=True)
-    plt.show()
+    print()
+
+    # Ініціалізація направленого графа
+    G = to_digraph(graph)
+
+    # Візуалізація графа
+    graph_show(G)

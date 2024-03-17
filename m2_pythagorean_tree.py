@@ -78,6 +78,14 @@ def draw_pifagor_tree(branch_len: int = 75):
     t.down()
 
     pifagor_tree(t, branch_len, level)
+    # t.up()
+    # t.hideturtle()
+    # t.backward(60)
+    # t.write(
+    #     "Дерево Піфагора\nclick anywhere to exit",
+    #     align="center",
+    #     font=("Arial", 10, "normal"),
+    # )
     window.exitonclick()
 
 
